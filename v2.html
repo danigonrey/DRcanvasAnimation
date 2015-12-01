@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+ <title>canvas animation</title>
+ <meta charset="utf-8">
+ <style>
+
+</style>
+ <script>
+ var canvas;
+ var context;
+ var shapes = []
+ var particles;
+ var timer;
+ var timerArt;
+ var timerOne;
+ var timerTwo;
+ var possibleShapes = ['triangle', 'heart']
+
+ function Shape(x, y, color) {
+ 	this.x = x;
+ 	this.y = y;
+ 	this.size = Math.random()*20+5;
+ 	this.dx = Math.random()*4-2;
+ 	this.dy = Math.random()*4-2;
+ 	this.shape = possibleShapes[Math.floor(Math.random()*possibleShapes.length)];
+ }
+
+ function init() {
+ 	canvas = document.getElementById('canvas');
+	context = canvas.getContext('2d');
+
+	resizeCanvas();
+	
+	timerOne = setInterval(resizeCanvas, 50);
+	timerTwo = setInterval(newShape, 300);
+ }
+
+ function newShape() {
+ 	var x = Math.random()*canvas.width;
+ 	var y = Math.random()*canvas.height;
+ 
+ 	
+ 	shapes.push(new Shape(x, y));
+ }
+
+ function resizeCanvas() {
+ 	
+ 	for(var i = 0; i < shapes.length; i++) {
+ 		if (shapes[i].shape == 'triangle') {
+ 			drawTriangle(shapes[i]);
+ 		} else if (shapes[i].shape == 'heart') {
+ 			drawHeart(shapes[i]);
+ 		} 
+ 		if (shapes[i].x + shapes[i].dx > canvas.width || shapes[i].x + shapes[i].dx < 0)
+ 			shapes[i].dx = -shapes[i].dx;
+ 		if (shapes[i].y + shapes[i].dy > canvas.height || shapes[i].y + shapes[i].dy < 0)
+ 			shapes[i].dy = -shapes[i].dy;
+ 		    shapes[i].x += shapes[i].dx;
+ 		    shapes[i].y += shapes[i].dy;
+ 	}
+ 	drawText();
+ }
+
+
+ function makeParticles() {
+	//create an array of particles for our animation
+	particles = [];
+	for(var i = 0; i < 500; i++){
+		particles.push(new Particle());
+	}
+ }
+
+ function degreesToRadians(degrees) {
+	 //converts from degrees to radians and returns
+	 return (degrees * Math.PI)/180;
+ }
+
+ function Particle() {
+	 //the constructor for a single particle, with random starting x+y, velocity, color, and radius
+	 this.x = Math.random()*canvas.width;
+	 this.y = Math.random()*canvas.height;
+	 this.vx = Math.random()*50-40;
+	 this.vy = Math.random()*50-40;
+	 var colors = ["#b3ffda", "blue", "#66d8ff", "#9968e4", "#ffffcc", "white", "#009999"];
+	 this.color = colors[Math.floor(Math.random()*colors.length)];
+	 this.radius = 2;
+ }
+
+ function moveParticles() {
+	 //partially clear the screen to fade previous circles, and draw a new particle at each new coordinate
+	 context.globalCompositeOperation = "source-over";
+	 context.fillStyle = "rgba(0, 0, 0, 0.3)";
+	 context.fillRect(0, 0, canvas.width, canvas.height);
+	 context.globalCompositeOperation = "lighter";
+	 for(var i = 0; i < particles.length; i++) {
+		 var p = particles[i];
+		 context.beginPath();
+		 context.arc(p.x, p.y, p.radius, 0, degreesToRadians(360), true);
+		 context.fillStyle = p.color;
+		 context.fill();
+		 p.x += p.vx;
+		 if(p.x < -50) p.x = canvas.width+50;
+		 if(p.y < -50) p.y = canvas.height+50;
+		 if(p.x > canvas.width+50) p.x = -50;
+		 if(p.y > canvas.height+50) p.y = -50;
+	 }
+ }
+
+function artHandler(){
+	
+	var canvas = document.getElementById('canvas');
+	var context = canvas.getContext('2d');
+	
+	
+	var colors = ['purple', '#ffff80', 'blue', '#68e4e4'];
+	var shapes = ['circle', 'square','semi'];
+	
+	for(var i = 0; i<20; i++){
+	    var color = colors[Math.floor(Math.random() * colors.length)];
+		var shape = shapes[Math.floor(Math.random() * shapes.length)];
+		
+		if (shape == 'circle') {
+		    drawCircle(canvas, context, color);
+		}
+		else if(shape == 'square') {
+			drawSquare(canvas, context, color);
+		}
+		else {
+			drawSemi(canvas, context, color);
+		}
+	}
+}
+
+
+function drawCircle(canvas, context, color) {
+    var radius = Math.floor(Math.random() * 40);
+	var x = Math.floor(Math.random() * canvas.width);
+	var y = Math.floor(Math.random() * canvas.height);
+	
+	context.beginPath();
+	context.arc(x, y, radius, 0, degreesToRadians(360), true); //parameter to crate a circle in arc. has starting and finishing angles and boolean true or false for direction 
+	context.fillStyle = color;
+	context.fill(); // fillinf circle with whatever color we pull
+}
+
+function drawSquare(canvas, context, color) {
+    var w = Math.floor(Math.random() * 40);
+	var x = Math.floor(Math.random() * canvas.width);
+	var y = Math.floor(Math.random() * canvas.height);
+	
+	context.fillRect(x, y, w, w);
+	context.fillStyle = color;
+	context.fill();
+}
+
+function drawSemi(canvas, context, color) {
+	var radius = Math.floor(Math.random() * 40);
+	var x = Math.floor(Math.random() * canvas.width);
+	var y = Math.floor(Math.random() * canvas.height);
+
+    context.beginPath();
+    context.arc(x, y, radius, 0, Math.PI, false);
+    context.closePath();
+    context.lineWidth = 5;
+    context.fillStyle = color;
+    context.fill();
+}
+
+function drawTriangle(triangle) {
+    context.beginPath();
+	context.fillStyle = triangle.color;
+	context.moveTo(triangle.x+triangle.size,triangle.y);
+	context.lineTo(triangle.x,triangle.y);
+	context.lineTo(triangle.x,triangle.y+triangle.size);
+	context.closePath();
+    context.fill();
+}
+
+function drawHeart(heart) {
+	context.beginPath();
+    context.moveTo(heart.x, heart.y); 
+    context.bezierCurveTo(heart.x, heart.y-3, heart.x-5, heart.y-15, heart.x-25, heart.y-15);
+    context.bezierCurveTo(heart.x-55, heart.y-15, heart.x-55, heart.y+22.5, heart.x-55, heart.y+22.5);
+    context.bezierCurveTo(heart.x-55, heart.y+40, heart.x-35, heart.y+62, heart.x, heart.y+80);
+    context.bezierCurveTo(heart.x+35, heart.y+62, heart.x+55, heart.y+40, heart.x+55, heart.y+22.5);
+    context.bezierCurveTo(heart.x+55, heart.y+22.5, heart.x+55, heart.y-15, heart.x+25, heart.y-15);
+    context.bezierCurveTo(heart.x+10, heart.y-15, heart.x, heart.y-3, heart.x, heart.y);
+    context.fillStyle = 'blue';
+    context.fill();
+}
+
+function drawText() {
+    context.fillStyle = '#ff8080';
+	context.font = '2em helvetica';
+	context.textAlign = 'right';
+	context.fillText('I dont want to believe, I want to know', canvas.width-450, canvas.height-350);
+}
+
+ window.onload = function() {
+ 	 canvas = document.getElementById('canvas');
+	 context = canvas.getContext('2d');
+	 makeParticles();
+	 init();
+	 timer = setInterval(moveParticles, 100);
+	 timerArt = setInterval(artHandler,1000);
+ }
+
+
+</script>
+</head>
+<body>
+	<canvas id="canvas" width="1400" height="700"></canvas>
+<form>
+
+</form>
+</body>
+</html>
